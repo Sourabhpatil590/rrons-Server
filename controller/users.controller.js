@@ -1,5 +1,4 @@
 import User from '../models/users.model.js';
-import fs from 'fs';
 
 // Create a new user
 const createUser = async (req, res) => {
@@ -35,7 +34,7 @@ const checkUserExists = async (req, res) => {
 		if ((await User.findOne({ email: req.body.email })) === null) {
 			return res.status(204).json({ data: 'User not found' }); //204 no content
 		} else {
-			res.status(201).json(user);
+			res.status(201).json({ _id: user._id });
 		}
 	} catch (error) {
 		res.status(500).json({ error: error.message });
@@ -78,37 +77,40 @@ const getResumeById = async (req, res) => {
 		if (!user) {
 			return res.status(404).json({ error: 'User not found' });
 		}
-		// console.log(user);
 
 		let buffer = Buffer.from(user.resume.data, 'base64');
-		// console.log('buffer', buffer);
-		fs.writeFileSync('./resume.pdf', buffer);
+		res.status(200).send({ data: buffer });
+		// res.status(200).send({
+		// 	data: buffer,
+		// 	contentType: user.resume.contentType,
+		// });
+		// console.log('created buffer', buffer);
+		// fs.writeFileSync('./resume.pdf', buffer);
 
 		// Send the PDF as a response
-		fs.readFile('resume.pdf', function (err, data) {
-			if (err) {
-				console.error('Failed to read PDF file:', err);
-				res.status(500).json({ error: 'Failed to read PDF file' });
-				return;
-			}
-			res.setHeader('Content-Type', 'application/pdf');
-			res.setHeader(
-				'Content-Disposition',
-				'attachment; filename="resume.pdf"'
-			);
+		// fs.readFile('resume.pdf', function (err, data) {
+		// 	if (err) {
+		// 		console.error('Failed to read PDF file:', err);
+		// 		res.status(500).json({ error: 'Failed to read PDF file' });
+		// 		return;
+		// 	}
+		// 	res.setHeader('Content-Type', 'application/pdf');
+		// 	res.setHeader(
+		// 		'Content-Disposition',
+		// 		'attachment; filename="resume.pdf"'
+		// 	);
+		// 	console.log('sending data', data)
+		// 	res.status(200).send(data);
 
-			res.status(200).send(data);
-
-			// Clean up temporary files
-			fs.unlink('resume.pdf', function (err) {
-				if (err) {
-					console.error('Failed to delete temporary file:', err);
-					res.status(404).json({
-						error: 'Failed to delete temporary file',
-					});
-				}
-			});
-		});
+		// Clean up temporary files
+		// fs.unlink('resume.pdf', function (err) {
+		// 	if (err) {
+		// 		console.error('Failed to delete temporary file:', err);
+		// 		res.status(404).json({
+		// 			error: 'Failed to delete temporary file',
+		// 		});
+		// 	}
+		// });
 	} catch (error) {
 		res.status(404).json({
 			error: error.message,
@@ -119,6 +121,7 @@ const getResumeById = async (req, res) => {
 // Update a user by ID
 const updateUserById = async (req, res) => {
 	let body = {};
+	// console.log('buffer:', req.file.buffer);
 	if (!req.file) {
 		body = req.body;
 	} else {
@@ -136,7 +139,7 @@ const updateUserById = async (req, res) => {
 		if (!updatedUser) {
 			return res.status(404).json({ error: 'User not found' });
 		}
-		console.log('updated user', updatedUser);
+		// console.log('updated user', updatedUser.resume);
 		res.status(200).json(updatedUser);
 	} catch (error) {
 		res.status(500).json({ error: error.message });
