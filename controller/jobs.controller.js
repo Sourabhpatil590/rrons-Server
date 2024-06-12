@@ -45,6 +45,7 @@ const createJob = async (req, res) => {
 };
 
 const updateJob = async (req, res) => {
+	// console.log(req.body);
 	try {
 		const job = await Job.findByIdAndUpdate(req.params.id, req.body);
 		if (!job) {
@@ -119,7 +120,7 @@ const applyJob = async (req, res) => {
 		}
 		job.appliedCandidates.push(req.body.candidate);
 		const response = await job.save();
-		res.status(201).json(response);
+		res.status(201).json({ message: 'Applied successfully' });
 	} catch (error) {
 		res.status(404).json({ error: error.message });
 	}
