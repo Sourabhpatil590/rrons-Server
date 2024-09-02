@@ -10,7 +10,11 @@ const addressSchema = new mongoose.Schema({
 
 const userSchema = new mongoose.Schema(
 	{
-		name: {
+		firstName: {
+			type: String,
+			required: true,
+		},
+		lastName: {
 			type: String,
 			required: true,
 		},
@@ -18,6 +22,10 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 			unique: true,
+		},
+		password: {
+			type: String,
+			required: true,
 		},
 		contact: {
 			type: Number,
@@ -31,11 +39,47 @@ const userSchema = new mongoose.Schema(
 			type: Array,
 			// required: true,
 		},
-		education: {
+		qualification: {
 			type: String,
 			// required: true,
 		},
-		experience: {
+		collage: {
+			type: String,
+			// required: true,
+		},
+		collageGrade: {
+			type: String,
+			// required: true,
+		},
+		passingYear: {
+			type: String,
+			// required: true,
+		},
+		currentCompany: {
+			type: String,
+			// required: true,
+		},
+		designation: {
+			type: String,
+			// required: true,
+		},
+		experienceInYears: {
+			type: String,
+			// required: true,
+		},
+		experienceInMonths: {
+			type: String,
+			// required: true,
+		},
+		location: {
+			type: String,
+			// required: true,
+		},
+		workExperience: {
+			type: String,
+			// required: true,
+		},
+		currentSalary: {
 			type: String,
 			// required: true,
 		},
@@ -46,6 +90,10 @@ const userSchema = new mongoose.Schema(
 		resume: {
 			data: Buffer,
 			contentType: String,
+		},
+		noticePeriod: {
+			type: String,
+			// required: true
 		},
 		createdAt: {
 			type: Date,
