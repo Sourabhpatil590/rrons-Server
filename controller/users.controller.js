@@ -1,28 +1,85 @@
 import User from '../models/users.model.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
-// Create a new user
-const createUser = async (req, res) => {
-	// console.log(req.body);
+// register a new user
+const registerUser = async (req, res) => {
+	const body = req.body;
 	try {
 		if ((await User.findOne({ email: req.body.email })) !== null) {
-			// console.log(await User.findOne({ email: req.body.email }));
 			return res.status(404).json({ error: 'User already exists' });
 		}
-
-		const user = await User.create({
+		let payload = {
+			...body,
 			address: {
-				village: req.body.village,
-				taluka: req.body.taluka,
-				district: req.body.district,
-				state: req.body.state,
+				village: body.village,
+				taluka: body.taluka,
+				district: body.district,
+				state: body.state,
 			},
+			password: await bcrypt.hash(body.password, 12),
 			resume: { data: req.file.buffer, contentType: req.file.mimetype },
-			...req.body,
-		});
-		user.resume = undefined;
-		res.status(201).json({ _id: user._id });
+		};
+
+		const user = await User.create(payload);
+
+		if (!user) {
+			return res.status(404).json({ error: 'User not created' });
+		}
+		const token = jwt.sign(
+			{ email: user.email, id: user._id },
+			process.env.JWT_SECRET,
+			{
+				expiresIn: 3600,
+			}
+		);
+		res.status(200).json({ token });
 	} catch (error) {
 		res.status(403).json({ error: error.message });
+	}
+};
+
+const loginUser = async (req, res) => {
+	const { email, password } = req.body;
+	try {
+		const user = await User.findOne({ email });
+		if (!user) {
+			return res.status(204).json({ data: 'User not found' });
+		}
+		console.log('user:', user.password, password);
+		const isMatch = await bcrypt.compare(password, user.password);
+		if (!isMatch) {
+			return res.status(401).json({ data: 'Invalid credentials' });
+		}
+
+		const token = jwt.sign(
+			{ email: user.email, id: user._id },
+			process.env.JWT_SECRET,
+			{
+				expiresIn: '1h',
+			}
+		);
+		res.status(200).json({ token });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
+const generateToken = async (req, res) => {
+	const { email } = req.body;
+	const user = await User.findOne({ email });
+
+	try {
+		const token = jwt.sign(
+			{ email: user.email, id: user._id },
+			process.env.JWT_SECRET,
+			{
+				expiresIn: '1h',
+			}
+		);
+		res.status(200).json({ token });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
 	}
 };
 
@@ -30,9 +87,8 @@ const createUser = async (req, res) => {
 const checkUserExists = async (req, res) => {
 	try {
 		const user = await User.findOne({ email: req.body.email });
-		// console.log((await User.findOne({ email: req.body.email })) === null);
-		if ((await User.findOne({ email: req.body.email })) === null) {
-			return res.status(204).json({ data: 'User not found' }); //204 no content
+		if (!user) {
+			return res.status(204).json({ data: 'User not found' });
 		} else {
 			res.status(201).json({ _id: user._id });
 		}
@@ -61,7 +117,7 @@ const getUserById = async (req, res) => {
 		if (!user) {
 			return res.status(404).json({ error: 'User not found' });
 		}
-		// user.resume = undefined;
+		user.resume = undefined;
 		res.status(200).json(user);
 	} catch (error) {
 		res.status(404).json({
@@ -80,37 +136,6 @@ const getResumeById = async (req, res) => {
 
 		let buffer = Buffer.from(user.resume.data, 'base64');
 		res.status(200).send({ data: buffer });
-		// res.status(200).send({
-		// 	data: buffer,
-		// 	contentType: user.resume.contentType,
-		// });
-		// console.log('created buffer', buffer);
-		// fs.writeFileSync('./resume.pdf', buffer);
-
-		// Send the PDF as a response
-		// fs.readFile('resume.pdf', function (err, data) {
-		// 	if (err) {
-		// 		console.error('Failed to read PDF file:', err);
-		// 		res.status(500).json({ error: 'Failed to read PDF file' });
-		// 		return;
-		// 	}
-		// 	res.setHeader('Content-Type', 'application/pdf');
-		// 	res.setHeader(
-		// 		'Content-Disposition',
-		// 		'attachment; filename="resume.pdf"'
-		// 	);
-		// 	console.log('sending data', data)
-		// 	res.status(200).send(data);
-
-		// Clean up temporary files
-		// fs.unlink('resume.pdf', function (err) {
-		// 	if (err) {
-		// 		console.error('Failed to delete temporary file:', err);
-		// 		res.status(404).json({
-		// 			error: 'Failed to delete temporary file',
-		// 		});
-		// 	}
-		// });
 	} catch (error) {
 		res.status(404).json({
 			error: error.message,
@@ -160,11 +185,13 @@ const deleteUserById = async (req, res) => {
 };
 
 export {
-	createUser,
+	loginUser,
+	registerUser,
 	checkUserExists,
 	getAllUsers,
 	getUserById,
 	updateUserById,
 	getResumeById,
 	deleteUserById,
+	generateToken,
 };
