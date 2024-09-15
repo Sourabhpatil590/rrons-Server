@@ -54,10 +54,10 @@ const loginUser = async (req, res) => {
 
 		const token = jwt.sign(
 			{ email: user.email, id: user._id },
-			process.env.JWT_SECRET,
-			{
-				expiresIn: '1h',
-			}
+			process.env.JWT_SECRET
+			// {
+			// 	expiresIn: '1h',
+			// }
 		);
 		res.status(200).json({ token });
 	} catch (error) {
@@ -72,10 +72,10 @@ const generateToken = async (req, res) => {
 	try {
 		const token = jwt.sign(
 			{ email: user.email, id: user._id },
-			process.env.JWT_SECRET,
-			{
-				expiresIn: '1h',
-			}
+			process.env.JWT_SECRET
+			// {
+			// 	expiresIn: '1h',
+			// }
 		);
 		res.status(200).json({ token });
 	} catch (error) {

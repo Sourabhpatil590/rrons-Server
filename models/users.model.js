@@ -55,28 +55,28 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			// required: true,
 		},
-		currentCompany: {
-			type: String,
-			// required: true,
-		},
-		designation: {
-			type: String,
-			// required: true,
-		},
-		experienceInYears: {
-			type: String,
-			// required: true,
-		},
-		experienceInMonths: {
-			type: String,
-			// required: true,
-		},
-		location: {
-			type: String,
-			// required: true,
-		},
-		workExperience: {
-			type: String,
+		// currentCompany: {
+		// 	type: String,
+		// 	// required: true,
+		// },
+		// designation: {
+		// 	type: String,
+		// 	// required: true,
+		// },
+		// experienceInYears: {
+		// 	type: String,
+		// 	// required: true,
+		// },
+		// experienceInMonths: {
+		// 	type: String,
+		// 	// required: true,
+		// },
+		// location: {
+		// 	type: String,
+		// 	// required: true,
+		// },
+		experience: {
+			type: Array,
 			// required: true,
 		},
 		currentSalary: {
