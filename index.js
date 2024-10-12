@@ -34,90 +34,78 @@ app.use(cors());
 app.use('/api/users', userRouter);
 app.use('/api/jobs', jobRouter);
 
-// const storage = multer.diskStorage({
-// 	destination: (req, file, cb) => {
-// 		cb(null, './resumes');
-// 	},
-// 	filename: (req, file, cb) => {
-// 		cb(null, file.originalname);
-// 	},
-// });
-// const upload = multer({ storage: storage }).single('resume');
+const storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, './resumes');
+	},
+	filename: (req, file, cb) => {
+		cb(null, file.originalname);
+	},
+});
+const upload = multer({ storage: storage }).single('resume');
 
-// app.post('/send-email', (req, res) => {
-// 	upload(req, res, (err) => {
-// 		if (err) {
-// 			console.log(err);
-// 			return res.status(500).end('Error uploading file');
-// 		} else {
-// 			console.log(req.body);
-// 			let name = req.body.name;
-// 			let emailID = req.body.emailID;
-// 			let skills = req.body.skills;
-// 			let education = req.body.education;
-// 			let salary = req.body.salary;
-// 			let experience = req.body.experience;
-// 			let path = req.file.path;
-// 			let position = req.body.position;
+app.post('/verify-otp', (req, res) => {
+	upload(req, res, (err) => {
+		if (err) {
+			console.log(err);
+			return res.status(500).end('Error uploading file');
+		} else {
+			console.log(req.body);
+			let emailID = req.body.emailID;
+			let otp = req.body.otp;
 
-// 			console.log(
-// 				name,
-// 				emailID,
-// 				skills,
-// 				education,
-// 				salary,
-// 				experience,
-// 				path
-// 			);
-// 			let transporter = nodemailer.createTransport({
-// 				service: 'gmail',
-// 				auth: {
-// 					user: 'rrons.manpowersol@gmail.com',
-// 					pass: process.env.EMAIL_PASS,
-// 				},
-// 			});
+			console.log(emailID, otp);
+			let transporter = nodemailer.createTransport({
+				service: 'gmail',
+				auth: {
+					user: 'rrons.manpowersol@gmail.com',
+					pass: process.env.EMAIL_PASS,
+				},
+			});
 
-// 			let mailOptions = {
-// 				from: 'rrons.manpowersol@gmail.com',
-// 				to: process.env.TO,
-// 				subject: `Inquiry for position ${position}`,
-// 				text: `Inquiry for position ${position}\n
-//                 These are the Details:\n
-//                 Name: ${name}\n
-//                 Email: ${emailID}\n
-//                 Skills: ${skills}\n
-//                 Education: ${education}\n
-//                 Salary: ${salary}\n
-//                 Experience: ${experience}
-//                 Please find the resume attached below`,
-// 				attachments: [
-// 					{
-// 						path: path,
-// 					},
-// 				],
-// 			};
-// 			transporter.sendMail(mailOptions, (err, info) => {
-// 				if (err) {
-// 					console.log(err);
-// 					res.send('error');
-// 				} else {
-// 					console.log('Email sent: ' + info.response);
-// 					res.send('success');
-// 				}
-// 			});
+			let mailOptions = {
+				from: 'rrons.manpowersol@gmail.com',
+				// to: process.env.TO,
+				to: emailID,
+				subject: `OTP for resetting password`,
+				// text: `Inquiry for position ${position}\n
+				// These are the Details:\n
+				// Name: ${name}\n
+				// Email: ${emailID}\n
+				// Skills: ${skills}\n
+				// Education: ${education}\n
+				// Salary: ${salary}\n
+				// Experience: ${experience}
+				// Please find the resume attached below`,
+				text: `Your OTP for resetting password is ${otp}`,
+				// attachments: [
+				// 	{
+				// 		path: path,
+				// 	},
+				// ],
+			};
+			transporter.sendMail(mailOptions, (err, info) => {
+				if (err) {
+					console.log(err);
+					res.send('error');
+				} else {
+					console.log('Email sent: ' + info.response);
+					res.send('success');
+				}
+			});
 
-// 			// fs.unlink(path, (err) => {
-// 			// 	if (err) {
-// 			// 		console.log(err);
-// 			// 	} else {
-// 			// 		console.log('File deleted successfully');
-// 			// 		res.send('success');
-// 			// 		// res.redirect('localhost:3000');
-// 			// 	}
-// 			// });
-// 		}
-// 	});
-// });
+			fs.unlink(path, (err) => {
+				if (err) {
+					console.log(err);
+				} else {
+					console.log('File deleted successfully');
+					res.send('success');
+					// res.redirect('localhost:3000');
+				}
+			});
+		}
+	});
+});
 
 const multerStorage = multer.memoryStorage();
 const uploadFile = multer({ storage: multerStorage });

@@ -8,6 +8,16 @@ const addressSchema = new mongoose.Schema({
 	state: String,
 });
 
+const experienceSchema = new mongoose.Schema({
+	_id: false, // <-- disable _id
+	currentCompany: String,
+	designation: String,
+	experienceInYears: String,
+	experienceInMonths: String,
+	location: String,
+	workExperience: String,
+});
+
 const userSchema = new mongoose.Schema(
 	{
 		firstName: {
@@ -22,6 +32,9 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 			unique: true,
+		},
+		gender: {
+			type: String,
 		},
 		password: {
 			type: String,
@@ -76,7 +89,7 @@ const userSchema = new mongoose.Schema(
 		// 	// required: true,
 		// },
 		experience: {
-			type: Array,
+			type: [experienceSchema],
 			// required: true,
 		},
 		currentSalary: {

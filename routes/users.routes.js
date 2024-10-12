@@ -12,6 +12,8 @@ import {
 	registerUser,
 	loginUser,
 	generateToken,
+	sendEmail,
+	resetPassword,
 } from '../controller/users.controller.js';
 import { authMiddleware } from '../middlewear/authorization.js';
 
@@ -36,6 +38,9 @@ userRouter.post('/generate-token', generateToken);
 // POST /users/check  check if user exists
 userRouter.post('/check', checkUserExists);
 
+// POST /verify-otp verify otp
+userRouter.post('/send-otp-email', sendEmail);
+
 // PUT /users/:id
 userRouter.put(
 	'/:id',
@@ -46,5 +51,8 @@ userRouter.put(
 
 // DELETE /users/:id
 userRouter.delete('/:id', authMiddleware, deleteUserById);
+
+// PUT /users/reset-password
+userRouter.put('/reset-password', resetPassword);
 
 export default userRouter;
