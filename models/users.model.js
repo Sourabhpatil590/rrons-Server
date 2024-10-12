@@ -8,6 +8,16 @@ const addressSchema = new mongoose.Schema({
 	state: String,
 });
 
+const experienceSchema = new mongoose.Schema({
+	_id: false, // <-- disable _id
+	currentCompany: String,
+	designation: String,
+	experienceInYears: String,
+	experienceInMonths: String,
+	location: String,
+	workExperience: String,
+});
+
 const userSchema = new mongoose.Schema(
 	{
 		firstName: {
@@ -22,6 +32,9 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 			unique: true,
+		},
+		gender: {
+			type: String,
 		},
 		password: {
 			type: String,
@@ -55,28 +68,28 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			// required: true,
 		},
-		currentCompany: {
-			type: String,
-			// required: true,
-		},
-		designation: {
-			type: String,
-			// required: true,
-		},
-		experienceInYears: {
-			type: String,
-			// required: true,
-		},
-		experienceInMonths: {
-			type: String,
-			// required: true,
-		},
-		location: {
-			type: String,
-			// required: true,
-		},
-		workExperience: {
-			type: String,
+		// currentCompany: {
+		// 	type: String,
+		// 	// required: true,
+		// },
+		// designation: {
+		// 	type: String,
+		// 	// required: true,
+		// },
+		// experienceInYears: {
+		// 	type: String,
+		// 	// required: true,
+		// },
+		// experienceInMonths: {
+		// 	type: String,
+		// 	// required: true,
+		// },
+		// location: {
+		// 	type: String,
+		// 	// required: true,
+		// },
+		experience: {
+			type: [experienceSchema],
 			// required: true,
 		},
 		currentSalary: {

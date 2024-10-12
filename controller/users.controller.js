@@ -1,6 +1,8 @@
 import User from '../models/users.model.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import multer from 'multer';
+import nodemailer from 'nodemailer';
 
 // register a new user
 const registerUser = async (req, res) => {
@@ -18,6 +20,7 @@ const registerUser = async (req, res) => {
 				state: body.state,
 			},
 			password: await bcrypt.hash(body.password, 12),
+			experience: JSON.parse(req.body.experience),
 			resume: { data: req.file.buffer, contentType: req.file.mimetype },
 		};
 
@@ -54,10 +57,10 @@ const loginUser = async (req, res) => {
 
 		const token = jwt.sign(
 			{ email: user.email, id: user._id },
-			process.env.JWT_SECRET,
-			{
-				expiresIn: '1h',
-			}
+			process.env.JWT_SECRET
+			// {
+			// 	expiresIn: '1h',
+			// }
 		);
 		res.status(200).json({ token });
 	} catch (error) {
@@ -72,10 +75,10 @@ const generateToken = async (req, res) => {
 	try {
 		const token = jwt.sign(
 			{ email: user.email, id: user._id },
-			process.env.JWT_SECRET,
-			{
-				expiresIn: '1h',
-			}
+			process.env.JWT_SECRET
+			// {
+			// 	expiresIn: '1h',
+			// }
 		);
 		res.status(200).json({ token });
 	} catch (error) {
@@ -146,12 +149,13 @@ const getResumeById = async (req, res) => {
 // Update a user by ID
 const updateUserById = async (req, res) => {
 	let body = {};
-	// console.log('buffer:', req.file.buffer);
+	// console.log('req.body', req.body);
 	if (!req.file) {
-		body = req.body;
+		body = { ...req.body, experience: JSON.parse(req?.body?.experience) };
 	} else {
 		body = {
 			...req.body,
+			experience: JSON.parse(req.body.experience),
 			resume: {
 				data: req.file.buffer,
 				contentType: req.file.mimetype,
@@ -184,6 +188,112 @@ const deleteUserById = async (req, res) => {
 	}
 };
 
+const storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, './resumes');
+	},
+	filename: (req, file, cb) => {
+		cb(null, file.originalname);
+	},
+});
+const upload = multer({ storage: storage }).single('resume');
+
+// Send OTP to email
+const sendEmail = (req, res) => {
+	upload(req, res, (err) => {
+		if (err) {
+			console.log(err);
+			return res.status(500).end('Error uploading file');
+		} else {
+			console.log(req.body);
+			// let name = req.body.name;
+			let emailID = req.body.emailID;
+			let otp = req.body.otp;
+			// let skills = req.body.skills;
+			// let education = req.body.education;
+			// let salary = req.body.salary;
+			// let experience = req.body.experience;
+			// let path = req.file.path;
+			// let position = req.body.position;
+
+			console.log(
+				// name,
+				emailID,
+				otp
+				// skills,
+				// education,
+				// salary,
+				// experience,
+				// path
+			);
+			let transporter = nodemailer.createTransport({
+				service: 'gmail',
+				auth: {
+					user: 'rrons.manpowersol@gmail.com',
+					pass: process.env.EMAIL_PASS,
+				},
+			});
+
+			let mailOptions = {
+				from: 'rrons.manpowersol@gmail.com',
+				// to: process.env.TO,
+				to: emailID,
+				subject: `OTP for resetting password`,
+				// text: `Inquiry for position ${position}\n
+				// These are the Details:\n
+				// Name: ${name}\n
+				// Email: ${emailID}\n
+				// Skills: ${skills}\n
+				// Education: ${education}\n
+				// Salary: ${salary}\n
+				// Experience: ${experience}
+				// Please find the resume attached below`,
+				text: `Your OTP for resetting password is ${otp}`,
+				// attachments: [
+				// 	{
+				// 		path: path,
+				// 	},
+				// ],
+			};
+			transporter.sendMail(mailOptions, (err, info) => {
+				if (err) {
+					console.log(err);
+					res.send('error');
+				} else {
+					console.log('Email sent: ' + info.response);
+					res.send('success');
+				}
+			});
+
+			// fs.unlink(path, (err) => {
+			// 	if (err) {
+			// 		console.log(err);
+			// 	} else {
+			// 		console.log('File deleted successfully');
+			// 		res.send('success');
+			// 	}
+			// });
+		}
+	});
+};
+
+// PUT /users/reset-password
+const resetPassword = async (req, res) => {
+	console.log('reset password called');
+	const { emailId, password } = req.body;
+	try {
+		const user = await User.findOne({ email: emailId });
+		if (!user) {
+			return res.status(404).json({ error: 'User not found' });
+		}
+		user.password = await bcrypt.hash(password, 12);
+		await user.save();
+		res.status(200).json({ message: 'Password reset successfully' });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
 export {
 	loginUser,
 	registerUser,
@@ -194,4 +304,6 @@ export {
 	getResumeById,
 	deleteUserById,
 	generateToken,
+	sendEmail,
+	resetPassword,
 };
