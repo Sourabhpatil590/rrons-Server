@@ -115,6 +115,7 @@ const getAllUsers = async (req, res) => {
 
 // Get a single user by ID
 const getUserById = async (req, res) => {
+	console.log('getUserById called');
 	try {
 		const user = await User.findById(req.params.id);
 		if (!user) {
@@ -131,6 +132,7 @@ const getUserById = async (req, res) => {
 
 // Get a resume by ID
 const getResumeById = async (req, res) => {
+	console.log('getResumeById called');
 	try {
 		const user = await User.findById(req.params.id);
 		if (!user) {
@@ -148,8 +150,8 @@ const getResumeById = async (req, res) => {
 
 // Update a user by ID
 const updateUserById = async (req, res) => {
+	console.log('updateUserById called');
 	let body = {};
-	// console.log('req.body', req.body);
 	if (!req.file) {
 		body = { ...req.body, experience: JSON.parse(req?.body?.experience) };
 	} else {
@@ -175,8 +177,35 @@ const updateUserById = async (req, res) => {
 	}
 };
 
+// Update a user by ID
+const updateResumeById = async (req, res) => {
+	console.log('updateUserById called');
+	let body = {};
+	if (!req.file) {
+		return res.status(404).json({ error: 'Resume not found' });
+	} else {
+		body = {
+			resume: {
+				data: req.file.buffer,
+				contentType: req.file.mimetype,
+			},
+		};
+	}
+
+	try {
+		const updatedUser = await User.findByIdAndUpdate(req.params.id, body);
+		if (!updatedUser) {
+			return res.status(404).json({ error: 'User not found' });
+		}
+		// console.log('updated user', updatedUser.resume);
+		res.status(200).json({ message: 'Resume updated successfully' });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
 // Delete a user by ID
 const deleteUserById = async (req, res) => {
+	console.log('deleteUserById called');
 	try {
 		const deletedUser = await User.findByIdAndDelete(req.params.id);
 		if (!deletedUser) {
@@ -306,4 +335,5 @@ export {
 	generateToken,
 	sendEmail,
 	resetPassword,
+	updateResumeById,
 };

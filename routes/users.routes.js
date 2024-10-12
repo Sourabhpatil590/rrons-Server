@@ -14,6 +14,7 @@ import {
 	generateToken,
 	sendEmail,
 	resetPassword,
+	updateResumeById,
 } from '../controller/users.controller.js';
 import { authMiddleware } from '../middlewear/authorization.js';
 
@@ -25,6 +26,14 @@ userRouter.get('/:id', authMiddleware, getUserById);
 
 // GET /users/:id
 userRouter.get('/resume/:id', authMiddleware, getResumeById);
+
+// PUT /users/:id
+userRouter.put(
+	'/update-resume/:id',
+	authMiddleware,
+	multer().single('resume'),
+	updateResumeById
+);
 
 // POST /users/create  create new user
 userRouter.post('/register', multer().single('resume'), registerUser);
@@ -41,6 +50,9 @@ userRouter.post('/check', checkUserExists);
 // POST /verify-otp verify otp
 userRouter.post('/send-otp-email', sendEmail);
 
+// PUT /users/reset-password
+userRouter.put('/reset-password', resetPassword);
+
 // PUT /users/:id
 userRouter.put(
 	'/:id',
@@ -51,8 +63,5 @@ userRouter.put(
 
 // DELETE /users/:id
 userRouter.delete('/:id', authMiddleware, deleteUserById);
-
-// PUT /users/reset-password
-userRouter.put('/reset-password', resetPassword);
 
 export default userRouter;
